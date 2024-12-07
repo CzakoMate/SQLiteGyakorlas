@@ -1,13 +1,16 @@
 import express from "express";
 import cors from "cors";
 import { initializeDB } from "./database.js";
-import usersRouter from "./routes/users.js";
+import productsRouter from "./routes/products.js"
+import swaggerUi from 'swagger-ui-express';
+import { readFile } from "fs/promises";
+const swaggerDocument = JSON.parse(await readFile(new URL("./swagger-output.json", import.meta.url)));
 
 const app = express();
 
 app.use(cors());
 app.use(express.json());
-app.use("/api/products", usersRouter);
+app.use("/api/products", productsRouter);
 
 app.use((err, req, res, next) => {
     console.error(err.stack);
@@ -18,5 +21,6 @@ const startServer = async () => {
     await initializeDB();
     app.listen(3000, () => console.log("Server is running on port 3000"));
 };
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 startServer();
